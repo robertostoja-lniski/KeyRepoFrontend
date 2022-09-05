@@ -45,38 +45,35 @@ export default function RemoveKeyForm() {
   const handleSubmit = async (e) => {
 
     console.log('Submited!')
-    console.log(values)
-    e.preventDefault();
-    alert('Trying to remove key: ' + e.target[0].value);
-    console.log(values)
     e.preventDefault();
     try {
-      let res = await fetch("http://localhost:5001/removeKey", {
-        method: "POST",
-        body: JSON.stringify({
-          id: e.target[0].value,
-        }),
-      });
+
+      let res = await fetch("http://127.0.0.1:5000/removeKey", 
+      { method: "GET" },
+      );
       let resJson = await res.json();
+      // status 200 means proper communication with backend
       if (res.status === 200) {
-        console.log('Removing key succeeded');
         console.log(resJson)
         console.log(values)
-        console.log('Setting values')
         setValues({ ...values, [e.target.name]: e.target.value });
-        console.log('Values set!')
-        console.log(values)
-        console.log('Submitting')
-        console.log(values)
-        console.log('BAM')
-        console.log(values)
+
+        var result = resJson['result']
+        if (result === 'failed') {
+          alert('Operation failed. Check logs for more info')
+        } else {
+          alert('Success! Key removed')
+        }
 
       } else {
         console.log('Removing key failed');
+        alert('Failed to remove key: ' + e.target[0].value);
       }
     } catch (err) {
       console.log(err);
+      alert('Backend not active or wrong address');
     }
+
 
   };
 
