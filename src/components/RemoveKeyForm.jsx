@@ -40,7 +40,7 @@ export default function RemoveKeyForm() {
     e.preventDefault();
     try {
 
-      let secretKey = 'my-secret';
+      let secretKey = process.env.JWT_SECRET;
       let data = {
         key_id: values['key_id'],
         system_pass: values['system_password']
@@ -48,7 +48,6 @@ export default function RemoveKeyForm() {
 
       const token = jwt.sign(data, secretKey)
       console.log(token)
-      console.log(values['key_id'])
 
       let fullUrl = "http://127.0.0.1:5000/removeKey?protected_data=" + token
       console.log('Sending GET to: ' + fullUrl)

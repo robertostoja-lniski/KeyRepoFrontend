@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./QrepoForm.css";
 import ArgInput from "./ArgInput.jsx";
+const jwt = require('jsonwebtoken');
 
 export default function RemoveKeyForm() {
 
@@ -31,52 +32,56 @@ export default function RemoveKeyForm() {
       label: "System password",
       required: true,
     },
-    {
-      id: 3,
-      name: "partition_password",
-      type: "password",
-      placeholder: "Partition password",
-      errorMessage: "Unique password to encrypt partition",
-      label: "Partition password",
-      required: true,
-    },
   ];
 
   const handleSubmit = async (e) => {
 
     console.log('Submited!')
-    console.log(values)
-    e.preventDefault();
-    alert('Trying to remove key: ' + e.target[0].value);
-    console.log(values)
     e.preventDefault();
     try {
-      let res = await fetch("http://localhost:5001/removeKey", {
-        method: "POST",
-        body: JSON.stringify({
-          id: e.target[0].value,
-        }),
-      });
+
+      let secretKey = process.env.REACT_APP_JWT_SECRET;
+      let data = {
+        key_id: values['key_id'],
+        system_pass: values['system_password']
+      }
+
+      const token = jwt.sign(data, secretKey)
+      console.log('Chosen values: ' + values)
+
+      let fullUrl = "http://127.0.0.1:5000/getKeyMode?protected_data=" + token
+      console.log('Sending GET to: ' + fullUrl)
+
+      let res = await fetch(fullUrl, 
+      { method: "GET" },
+      );
       let resJson = await res.json();
+      // status 200 means proper communication with backend
       if (res.status === 200) {
-        console.log('Removing key succeeded');
         console.log(resJson)
-        console.log(values)
-        console.log('Setting values')
         setValues({ ...values, [e.target.name]: e.target.value });
-        console.log('Values set!')
-        console.log(values)
-        console.log('Submitting')
-        console.log(values)
-        console.log('BAM')
-        console.log(values)
+
+        var result = resJson['result']
+        if (result === 'failed') {
+          alert('Operation failed. Check logs for more info')
+        } else {
+          var answerCode = resJson['qrepo_code']
+          if (answerCode === 0) {
+            alert('Key modes are ' + resJson['modes'])
+          } else {
+            alert('Failure! Qrepo answered with error code: ' + answerCode)
+          }
+        }
 
       } else {
         console.log('Removing key failed');
+        alert('Failed to remove key: ' + e.target[0].value);
       }
     } catch (err) {
       console.log(err);
+      alert('Backend not active or wrong address');
     }
+
 
   };
 
@@ -89,7 +94,7 @@ export default function RemoveKeyForm() {
     <div className="general-form">
         {
           <form onSubmit={handleSubmit}>
-            <h1>Remove Key</h1>
+            <h1>Get Key Mode</h1>
             {inputs.map((input) => (
               < ArgInput
                 key={input.id}
