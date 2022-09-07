@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./QrepoForm.css";
 import ArgInput from "./ArgInput.jsx";
+const jwt = require('jsonwebtoken');
 
 export default function RemoveKeyForm() {
 
@@ -31,15 +32,6 @@ export default function RemoveKeyForm() {
       label: "System password",
       required: true,
     },
-    {
-      id: 3,
-      name: "partition_password",
-      type: "password",
-      placeholder: "Partition password",
-      errorMessage: "Unique password to encrypt partition",
-      label: "Partition password",
-      required: true,
-    },
   ];
 
   const handleSubmit = async (e) => {
@@ -48,7 +40,20 @@ export default function RemoveKeyForm() {
     e.preventDefault();
     try {
 
-      let res = await fetch("http://127.0.0.1:5000/removeKey", 
+      let secretKey = 'my-secret';
+      let data = {
+        key_id: values['key_id'],
+        system_pass: values['system_password']
+      }
+
+      const token = jwt.sign(data, secretKey)
+      console.log(token)
+      console.log(values['key_id'])
+
+      let fullUrl = "http://127.0.0.1:5000/removeKey?protected_data=" + token
+      console.log('Sending GET to: ' + fullUrl)
+
+      let res = await fetch(fullUrl, 
       { method: "GET" },
       );
       let resJson = await res.json();
@@ -62,7 +67,12 @@ export default function RemoveKeyForm() {
         if (result === 'failed') {
           alert('Operation failed. Check logs for more info')
         } else {
-          alert('Success! Key removed')
+          var answerCode = resJson['qrepo_code']
+          if (answerCode === '0') {
+            alert('Success! Key removed')
+          } else {
+            alert('Failure! Qrepo answered with error code: ' + answerCode)
+          }
         }
 
       } else {
