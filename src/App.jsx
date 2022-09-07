@@ -1,5 +1,6 @@
 import RemoveKeyForm from "./components/RemoveKeyForm.jsx";
 import GetKeyMode from "./components/GetKeyMode.jsx";
+import GetPrivateKey from "./components/GetPrivateKey.jsx";
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
         <Routes>
           <Route exact path='/removeKey' element={<RemoveKeyForm/>}></Route>
           <Route exact path='/getKeyMode' element={<GetKeyMode/>}></Route>
+          <Route exact path='/getPrivateKey' element={<GetPrivateKey/>}></Route>
         </Routes>
       </Router>
   );

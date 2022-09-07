@@ -32,6 +32,15 @@ export default function RemoveKeyForm() {
       label: "System password",
       required: true,
     },
+    {
+        id: 3,
+        name: "partition_password",
+        type: "password",
+        placeholder: "Partition password",
+        errorMessage: "Unique password to encrypt partition",
+        label: "Partition password",
+        required: true,
+      },
   ];
 
   const handleSubmit = async (e) => {
@@ -43,13 +52,14 @@ export default function RemoveKeyForm() {
       let secretKey = process.env.REACT_APP_JWT_SECRET;
       let data = {
         key_id: values['key_id'],
-        system_pass: values['system_password']
+        system_pass: values['system_password'],
+        return_key_val: 'True'
       }
 
       const token = jwt.sign(data, secretKey)
       console.log('Chosen values: ' + values)
 
-      let fullUrl = "http://127.0.0.1:5000/getKeyMode?protected_data=" + token
+      let fullUrl = "http://127.0.0.1:5000/readKey?protected_data=" + token
       console.log('Sending GET to: ' + fullUrl)
 
       let res = await fetch(fullUrl, 
@@ -67,7 +77,22 @@ export default function RemoveKeyForm() {
         } else {
           var answerCode = resJson['qrepo_code']
           if (answerCode === 0) {
-            alert('Key modes are ' + resJson['modes'])
+            alert('Key read. Click to see content in chunks. Do not show it to anybody')
+            let keyVal = resJson['key_val']
+            let keyLen = keyVal.length
+            if (keyLen > 1000) {
+
+                alert('Key is too long. Will be presented in chunks.')
+
+                for (let i = 0; i < keyLen; i+= 1000) {
+                    let keyChunk = keyVal.substring(i, i + 999)
+                    alert(keyChunk)
+                }
+
+            } else {
+                alert(resJson['key_val'])
+            }
+
           } else {
             alert('Failure! Qrepo answered with error code: ' + answerCode)
           }
@@ -94,7 +119,7 @@ export default function RemoveKeyForm() {
     <div className="general-form">
         {
           <form onSubmit={handleSubmit}>
-            <h1>Get Key Mode</h1>
+            <h1>Get Private Key</h1>
             {inputs.map((input) => (
               < ArgInput
                 key={input.id}

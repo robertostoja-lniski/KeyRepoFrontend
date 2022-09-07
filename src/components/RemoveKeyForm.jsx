@@ -28,7 +28,7 @@ export default function RemoveKeyForm() {
       name: "system_password",
       type: "password",
       placeholder: "System password",
-      errorMessage: "Unique password to encrypt partition",
+      errorMessage: "Unique password to enter partition",
       label: "System password",
       required: true,
     },
