@@ -40,27 +40,48 @@ export default function RemoveKeyForm() {
         errorMessage: "Unique password to encrypt partition",
         label: "Partition password",
         required: true,
-      },
+    },
+    {
+        id: 4,
+        name: "message",
+        type: "text",
+        placeholder: "Path to message",
+        errorMessage: "System path",
+        label: "Path to message",
+        required: true,
+    },
+    {
+        id: 5,
+        name: "signature",
+        type: "text",
+        placeholder: "Path to export signature",
+        errorMessage: "System path",
+        label: "Path to export signature",
+        required: true,
+    },
   ];
 
   const handleSubmit = async (e) => {
 
     console.log('Submited!')
     e.preventDefault();
+
     try {
 
       let secretKey = process.env.REACT_APP_JWT_SECRET;
       let data = {
         key_id: values['key_id'],
-        system_pass: values['system_password'],
         partition_pass: values['partition_password'],
+        system_pass: values['system_password'],
+        plain_file: values['message'],
+        signature: values['signature'],
         return_key_val: 'True'
       }
 
       const token = jwt.sign(data, secretKey)
       console.log('Chosen values: ' + values)
 
-      let fullUrl = "http://127.0.0.1:5000/readKey?protected_data=" + token
+      let fullUrl = "http://127.0.0.1:5000/sign?protected_data=" + token
       console.log('Sending GET to: ' + fullUrl)
 
       let res = await fetch(fullUrl, 
@@ -78,21 +99,8 @@ export default function RemoveKeyForm() {
         } else {
           var answerCode = resJson['qrepo_code']
           if (answerCode === 0) {
-            alert('Key read. Click to see content in chunks. Do not show it to anybody')
+            alert('Sign completed!')
             let keyVal = resJson['key_val']
-            let keyLen = keyVal.length
-            if (keyLen > 1000) {
-
-                alert('Key is too long. Will be presented in chunks.')
-
-                for (let i = 0; i < keyLen; i+= 1000) {
-                    let keyChunk = keyVal.substring(i, i + 999)
-                    alert(keyChunk)
-                }
-
-            } else {
-                alert(resJson['key_val'])
-            }
 
           } else {
             alert('Failure! Qrepo answered with error code: ' + answerCode)
@@ -101,7 +109,7 @@ export default function RemoveKeyForm() {
 
       } else {
         console.log('Removing key failed');
-        alert('Failed to remove key: ' + e.target[0].value);
+        alert('Failed to sign: ' + e.target[0].value);
       }
     } catch (err) {
       console.log(err);
@@ -120,7 +128,7 @@ export default function RemoveKeyForm() {
     <div className="general-form">
         {
           <form onSubmit={handleSubmit}>
-            <h1>Get Private Key</h1>
+            <h1>Sign</h1>
             {inputs.map((input) => (
               < ArgInput
                 key={input.id}
