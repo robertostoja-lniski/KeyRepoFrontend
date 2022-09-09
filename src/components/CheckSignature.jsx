@@ -6,36 +6,25 @@ const jwt = require('jsonwebtoken');
 export default function RemoveKeyForm() {
 
   const [values, setValues] = useState({
-    key_id: "",
-    system_password: "",
+    pub_key_path: "",
+    signature: "",
     partition_password: "",
     message: "",
-    signature: "",
   });
 
   const inputs = [
     {
       id: 1,
-      name: "key_id",
+      name: "pub_key_path",
       type: "text",
-      placeholder: "Key id",
+      placeholder: "Pub key",
       errorMessage:
-        "Key identificator is a numeric unique value assigned to a resouce",
-      label: "Key id",
-      pattern: "^(0|[1-9][0-9]*)$",
+        "Path to key with public file",
+      label: "Pub key",
       required: true,
     },
     {
-      id: 2,
-      name: "system_password",
-      type: "password",
-      placeholder: "System password",
-      errorMessage: "Unique password to enter partition",
-      label: "System password",
-      required: true,
-    },
-    {
-        id: 3,
+        id: 2,
         name: "partition_password",
         type: "password",
         placeholder: "Partition password",
@@ -44,7 +33,7 @@ export default function RemoveKeyForm() {
         required: true,
     },
     {
-        id: 4,
+        id: 3,
         name: "message",
         type: "text",
         placeholder: "Path to message",
@@ -53,12 +42,12 @@ export default function RemoveKeyForm() {
         required: true,
     },
     {
-        id: 5,
+        id: 4,
         name: "signature",
         type: "text",
-        placeholder: "Path to export signature",
+        placeholder: "Path to existing signature",
         errorMessage: "System path",
-        label: "Path to export signature",
+        label: "Path to existing signature",
         required: true,
     },
   ];
@@ -72,18 +61,16 @@ export default function RemoveKeyForm() {
 
       let secretKey = process.env.REACT_APP_JWT_SECRET;
       let data = {
-        key_id: values['key_id'],
+        pub_key_path: values['pub_key_path'],
         partition_pass: values['partition_password'],
-        system_pass: values['system_password'],
         plain_file: values['message'],
         signature: values['signature'],
-        return_key_val: 'True'
       }
 
       const token = jwt.sign(data, secretKey)
       console.log('Chosen values: ' + values)
 
-      let fullUrl = "http://127.0.0.1:5000/sign?protected_data=" + token
+      let fullUrl = "http://127.0.0.1:5000/checkSignature?protected_data=" + token
       console.log('Sending GET to: ' + fullUrl)
 
       let res = await fetch(fullUrl, 
@@ -99,12 +86,7 @@ export default function RemoveKeyForm() {
         if (result === 'failed') {
           alert('Operation failed. Check logs for more info')
         } else {
-          var answerCode = resJson['qrepo_code']
-          if (answerCode === 'OK') {
-            alert('Signature Matched!')
-          } else {
-            alert('Failure! Qrepo answered with error code: ' + answerCode)
-          }
+          alert('Check signature status: ' + resJson['qrepo_code'])
         }
 
       } else {
@@ -128,7 +110,7 @@ export default function RemoveKeyForm() {
     <div className="general-form">
         {
           <form onSubmit={handleSubmit}>
-            <h1>Sign</h1>
+            <h1>Check Signature</h1>
             {inputs.map((input) => (
               < ArgInput
                 key={input.id}

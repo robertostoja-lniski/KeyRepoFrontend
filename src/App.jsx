@@ -4,6 +4,7 @@ import GetPrivateKey from "./components/GetPrivateKey.jsx";
 import CreateKey from "./components/CreateKey.jsx";
 import SetKeyMode from "./components/SetKeyMode.jsx";
 import Sign from "./components/Sign.jsx";
+import CheckSignature from "./components/CheckSignature.jsx";
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route exact path='/setKeyMode' element={<SetKeyMode/>}></Route>
           <Route exact path='/getPrivateKey' element={<GetPrivateKey/>}></Route>
           <Route exact path='/sign' element={<Sign/>}></Route>
+          <Route exact path='/checkSignature' element={<CheckSignature/>}></Route>
         </Routes>
       </Router>
   );
