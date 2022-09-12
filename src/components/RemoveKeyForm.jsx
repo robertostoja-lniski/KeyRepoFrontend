@@ -40,7 +40,7 @@ export default function RemoveKeyForm() {
     e.preventDefault();
     try {
 
-      let secretKey = process.env.JWT_SECRET;
+      let secretKey = process.env.REACT_APP_JWT_SECRET;
       let data = {
         key_id: values['key_id'],
         system_pass: values['system_password']
